@@ -2,80 +2,49 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Set
 
 // Remember to rename these classes and interfaces!
 
-interface MyPluginSettings {
+interface ModeCyclesSettings {
 	mySetting: string;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
+const DEFAULT_SETTINGS: ModeCyclesSettings = {
 	mySetting: 'default'
 }
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class ModeCycles extends Plugin {
+	settings: ModeCyclesSettings;
 
 	async onload() {
+		//Settings
 		await this.loadSettings();
+		this.addSettingTab(new ModeCyclesSettings(this.app, this));
 
-		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
+		const ribbonCycleNote = this.addRibbonIcon('copy', 'Cycle Note Mode', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
+			noteCycle();
 		});
-		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
-
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status Bar Text');
-
-		// This adds a simple command that can be triggered anywhere
+		
+		//Note Cycle Command
 		this.addCommand({
-			id: 'open-sample-modal-simple',
-			name: 'Open sample modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			}
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'sample-editor-command',
-			name: 'Sample editor command',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				console.log(editor.getSelection());
-				editor.replaceSelection('Sample Editor Command');
-			}
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-sample-modal-complex',
-			name: 'Open sample modal (complex)',
+			id: 'note-mode-cycle',
+			name: 'Cycle Note Mode', //Source > Live Preview > Reading
 			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
+				if (this.app.workspace.getActiveViewOfType(MarkdownView)) { 
+					if (!checking) { noteCycle(); } 
+					return true	
+				} else { errorMessages(errorNote) }
 			}
 		});
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
 
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
+		const ribbonCycleDarkLight = this.addRibbonIcon('eye', 'Cycle Dark / Light Mode', (evt: MouseEvent) => { darkLightCycle(); });
+		
+		//Note Cycle Command
+		this.addCommand({
+			id: 'dark-light-mode-cycle',
+			name: 'Cycle Dark / Light Mode',
+			callback: () => { darkLightCycle() }
 		});
 
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
 	}
 
 	onunload() {
@@ -91,26 +60,81 @@ export default class MyPlugin extends Plugin {
 	}
 }
 
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
+let currentMode: string;
+let errorNote = "No note active!\nTry clicking on a note to cycle through that note's modes.";
 
-	onOpen() {
-		const {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
-	}
+function errorMessages(error) {
+	return new Notice(error)
 }
 
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+//Cycle Note Mode
+function noteCycle() {
+	const thisApp = this.app.workspace
+	const noteMode = thisApp.getActiveViewOfType(MarkdownView)?.currentMode;
+
+	//Check if Markdown Note, else throw error notice
+	if (noteMode == undefined) { return errorMessages(errorNote); } 
+	// console.debug(noteMode);
+	
+	if (noteMode.type == "preview") {
+		currentMode = "reading";
+	} else if (noteMode.type == "source" && noteMode.sourceMode == true) {
+		currentMode = "source";
+	} else if (noteMode.type == "source" && noteMode.sourceMode == false) {
+		currentMode = "live";
+	}
+	// console.debug(currentMode);
+
+	//Cycle to next mode: Source --> Live Preview --> Reading
+	let newNoteMode = thisApp.activeLeaf.getViewState();
+	switch (currentMode) {
+		case "reading":
+			//Reading -> Source
+			newNoteMode.state.mode = "source";
+			newNoteMode.state.source = true;
+			break;
+		case "source":
+			//Source -> Live
+			newNoteMode.state.mode = "source";
+			newNoteMode.state.source = false;
+			break;
+		case "live":
+			//Live -> Reading
+			newNoteMode.state.mode = "preview";
+			newNoteMode.state.source = false;
+			break;
+	}
+	// console.debug(newNoteMode)
+
+	return this.app.workspace.activeLeaf.setViewState(newNoteMode);
+}
+
+
+//Cycle Dark / Light Mode
+function darkLightCycle() {
+	const darkMode = this.app.vault.getConfig("theme") === "obsidian";
+
+    if (darkMode) {
+        this.app.setTheme("moonstone");
+        this.app.vault.setConfig("theme", "moonstone");
+    } else {
+        this.app.setTheme("obsidian");
+        this.app.vault.setConfig("theme", "obsidian");
+    }
+}
+
+
+//Cycle List Modes
+function listCycle() {
+
+}
+
+
+class ModeCyclesSettings extends PluginSettingTab {
+	plugin: ModeCycles;
+
+	constructor(app: App, plugin: ModeCycles) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -118,7 +142,8 @@ class SampleSettingTab extends PluginSettingTab {
 	display(): void {
 		const {containerEl} = this;
 
-		containerEl.empty();
+		containerEl.empty() // Clear when reopening
+		containerEl.createEl('h1', {text: 'Mode Cycles'});
 
 		new Setting(containerEl)
 			.setName('Setting #1')
