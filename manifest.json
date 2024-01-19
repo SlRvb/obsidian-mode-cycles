@@ -1,7 +1,7 @@
 {
 	"id": "mode-cycles",
 	"name": "Mode Cycles",
-	"version": "0.1.01",
+	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
 	"description": "Cycle through different modes in Obsidian. Light/Darkmode, Source/Live Preview/Reading Modes.",
 	"author": "SlRvb",
