@@ -3,8 +3,8 @@
 	"name": "Mode Cycles",
 	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
-	"description": "This is a sample plugin for Obsidian. This plugin demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
+	"description": "Cycle through different modes in Obsidian. Light/Darkmode, Source/Live Preview/Reading Modes.",
+	"author": "SlRvb",
 	"authorUrl": "https://publish.obsidian.md/slrvb-docs",
 	"fundingUrl": "https://ko-fi.com/slrvb",
 	"isDesktopOnly": false
