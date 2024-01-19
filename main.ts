@@ -56,7 +56,7 @@ export default class ModeCycles extends Plugin {
 }
 
 let currentMode: string;
-let errorNote = "No note active!\nTry clicking on a note to cycle through that note's modes.";
+let errorNote;
 
 function errorMessages(error) {
 	return new Notice(error)
@@ -67,10 +67,13 @@ function errorMessages(error) {
 function noteCycle() {
 	const thisApp = this.app.workspace
 	const noteMode = thisApp.getActiveViewOfType(MarkdownView)?.currentMode;
+	errorNote = "No note active!\nTry clicking on a note to cycle through that note's modes.";
+
 
 	//Check if Markdown Note, else throw error notice
 	if (noteMode == undefined) { return errorMessages(errorNote); } 
 	// console.debug(noteMode);
+
 	
 	if (noteMode.type == "preview") {
 		currentMode = "reading";
@@ -121,9 +124,9 @@ function darkLightCycle() {
 
 
 //Cycle List Modes
-function listCycle() {
+// function listCycle() {
 
-}
+// }
 
 
 // class ModeCyclesSettings extends PluginSettingTab {
