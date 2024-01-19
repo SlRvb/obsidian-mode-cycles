@@ -11,12 +11,12 @@ const DEFAULT_SETTINGS: ModeCyclesSettings = {
 }
 
 export default class ModeCycles extends Plugin {
-	settings: ModeCyclesSettings;
+	// settings: ModeCyclesSettings;
 
 	async onload() {
 		//Settings
-		await this.loadSettings();
-		this.addSettingTab(new ModeCyclesSettings(this.app, this));
+		// await this.loadSettings();
+		// this.addSettingTab(new ModeCyclesSettings(this.app, this));
 
 		const ribbonCycleNote = this.addRibbonIcon('copy', 'Cycle Note Mode', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
@@ -51,13 +51,8 @@ export default class ModeCycles extends Plugin {
 
 	}
 
-	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-	}
-
-	async saveSettings() {
-		await this.saveData(this.settings);
-	}
+	// async loadSettings() { this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData()); }
+	// async saveSettings() { await this.saveData(this.settings); }
 }
 
 let currentMode: string;
@@ -131,29 +126,29 @@ function listCycle() {
 }
 
 
-class ModeCyclesSettings extends PluginSettingTab {
-	plugin: ModeCycles;
+// class ModeCyclesSettings extends PluginSettingTab {
+// 	plugin: ModeCycles;
 
-	constructor(app: App, plugin: ModeCycles) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
+// 	constructor(app: App, plugin: ModeCycles) {
+// 		super(app, plugin);
+// 		this.plugin = plugin;
+// 	}
 
-	display(): void {
-		const {containerEl} = this;
+// 	display(): void {
+// 		const {containerEl} = this;
 
-		containerEl.empty() // Clear when reopening
-		containerEl.createEl('h1', {text: 'Mode Cycles'});
+// 		containerEl.empty() // Clear when reopening
+// 		containerEl.createEl('h1', {text: 'Mode Cycles'});
 
-		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
-	}
-}
+// 		new Setting(containerEl)
+// 			.setName('Setting #1')
+// 			.setDesc('It\'s a secret')
+// 			.addText(text => text
+// 				.setPlaceholder('Enter your secret')
+// 				.setValue(this.plugin.settings.mySetting)
+// 				.onChange(async (value) => {
+// 					this.plugin.settings.mySetting = value;
+// 					await this.plugin.saveSettings();
+// 				}));
+// 	}
+// }
